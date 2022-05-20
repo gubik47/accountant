@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+    app:
+        container_name: accountant_app
+        build:
+            context: ./docker/webserver
+        environment:
+            - APP_ENV=${APP_ENV}
+            - APP_SECRET=${APP_SECRET}
+            - PHP_FPM_UID=${DOCKER_CONTAINER_UID}
+            - PHP_FPM_GID=${DOCKER_CONTAINER_GID}
+        volumes:
+            - ./:/var/www
+        networks:
+            - default
+            - cnc_network
+            - traefik_proxy
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.cnc_admin.rule=Host(`accountant.local`)"
+            - "traefik.docker.network=traefik_proxy"
+
+    builder:
+        container_name: accountant_builder
+        build:
+            context: ./docker/builder
+        environment:
+            - APP_ENV=${APP_ENV}
+            - APP_SECRET=${APP_SECRET}
+        volumes:
+            - ./:/var/www
+        user: "${DOCKER_CONTAINER_UID}:${DOCKER_CONTAINER_GID}"
+        tty: true
+        stdin_open: true
+
+    mariadb:
+        image: mariadb:10.5.5
+        volumes:
+            - ./docker/mariadb/db:/var/lib/mysql
+        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_czech_ci
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+            - TZ=Europe/Prague
+
+    phpmyadmin:
+        image: phpmyadmin:5.1.1
+        environment:
+            - PMA_HOST=mariadb
+            - MYSQL_ROOT_PASSWORD=root
+            - TZ=Europe/Prague
+        networks:
+            - default
+            - traefik_proxy
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.cnc_admin_mysql.rule=Host(`mysql.accountant.local`)"
+            - "traefik.docker.network=traefik_proxy"
+
+networks:
+    cnc_network:
+        external: true
+    traefik_proxy:
+        external: true
