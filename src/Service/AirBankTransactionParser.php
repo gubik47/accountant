@@ -31,7 +31,6 @@ class AirBankTransactionParser extends TransactionParser
             ->setNote($data[17] ?: null)
             ->setConsigneeMessage($data[19] ?: null)
             ->setLocation($data[24] ?: null)
-            ->setDateOfCharge($data[29] ? DateTime::createFromFormat("d/m/Y", $data[29]) : null)
-            ->setSource(Transaction::SOURCE_AIRBANK);
+            ->setDateOfCharge($data[29] ? DateTime::createFromFormat("d/m/Y", $data[29]) : null);
     }
 }

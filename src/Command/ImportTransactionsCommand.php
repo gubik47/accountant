@@ -2,8 +2,10 @@
 
 namespace App\Command;
 
+use App\Entity\BankAccount;
 use App\Entity\Transaction;
 use App\Service\AirBankTransactionParser;
+use App\Service\CreditasTransactionParser;
 use App\Service\EquaBankTransactionParser;
 use App\Service\SberBankTransactionParser;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,21 +35,56 @@ class ImportTransactionsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $files = [
-            "air_bank.csv",
-            "equa.csv",
-            "sb.csv"
+            [
+                "account" => "1683259015/3030",
+                "file" => "air_bank_1683259015.csv"
+            ],
+            [
+                "account" => "1683259023/3030",
+                "file" => "air_bank_1683259023.csv"
+            ],
+            [
+                "account" => "1021895274/6100",
+                "file" => "equa_1021895274.csv"
+            ],
+            [
+                "account" => "1024422878/6100",
+                "file" => "equa_1024422878.csv"
+            ],
+            [
+                "account" => "3211750833/6800",
+                "file" => "sberbank_3211750833.csv"
+            ],
+            [
+                "account" => "3211791088/6800",
+                "file" => "sberbank_3211791088.csv"
+            ],
+            [
+                "account" => "104834333/2250",
+                "file" => "creditas_104834333.csv"
+            ],
         ];
 
-        foreach ($files as $fileName) {
-            if ($fileName === "air_bank.csv") {
-                $parser = new AirBankTransactionParser();
-            } elseif ($fileName === "equa.csv") {
-                $parser = new EquaBankTransactionParser();
-            } else {
-                $parser = new SberBankTransactionParser();
+        foreach ($files as $fileCfg) {
+            /** @var BankAccount $account */
+            $account = $this->em->getRepository(BankAccount::class)->findOneBy(["number" => $fileCfg["account"]]);
+            if (!$account) {
+                $output->writeln("Account with number {$fileCfg["account"]} not found.");
+                continue;
             }
 
-            $file = fopen(dirname(__DIR__, 2) . "/data/$fileName", "r");
+            if ($account->getBank()->getId() === 1) {
+                // airbank
+                $parser = new AirBankTransactionParser();
+            } elseif ($account->getBank()->getId() === 2) {
+                $parser = new SberBankTransactionParser();
+            } elseif ($account->getBank()->getId() === 3) {
+                $parser = new EquaBankTransactionParser();
+            } else {
+                $parser = new CreditasTransactionParser();
+            }
+
+            $file = fopen(dirname(__DIR__, 2) . "/data/{$fileCfg["file"]}", "r");
 
             $ctr = 0;
             while (($line = fgetcsv($file, 0, ";")) !== false) {
@@ -63,7 +100,8 @@ class ImportTransactionsCommand extends Command
                 $transaction = $repo->findOneBy(["transactionId" => $transactionId]);
                 if (!$transaction) {
                     $transaction = new Transaction();
-                    $transaction->setTransactionId($transactionId);
+                    $transaction->setTransactionId($transactionId)
+                        ->setBankAccount($account);
                 }
 
                 $parser->updateTransactionData($transaction, $line);

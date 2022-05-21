@@ -9,7 +9,7 @@ class SberBankTransactionParser extends TransactionParser
 {
     public function getTransactionId(array $data): string
     {
-        // Sberbank has no ID in its CSV dump
+        // Sberbank has no transaction ID in its CSV dump
         // generating an artificial one
         return substr(sha1(implode(",", $data)), 0, 10);
     }
@@ -22,7 +22,6 @@ class SberBankTransactionParser extends TransactionParser
             ->setDescription($data[3] ?: null)
             ->setCounterPartyAccountNumber($data[4] ?: null)
             ->setAmount(floatval(str_replace(",", ".", $data[5])))
-            ->setCurrency($data[6])
-            ->setSource(Transaction::SOURCE_SBERBANK);
+            ->setCurrency($data[6]);
     }
 }

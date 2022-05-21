@@ -26,7 +26,6 @@ class EquaBankTransactionParser extends TransactionParser
             ->setVariableSymbol($data[12] ?: null)
             ->setSpecificSymbol($data[13] ?: null)
             ->setConstantSymbol($data[14] ?: null)
-            ->setLocation($data[15] ?: null)
-            ->setSource(Transaction::SOURCE_EQUABANK);
+            ->setLocation($data[15] ?: null);
     }
 }

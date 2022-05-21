@@ -4,18 +4,19 @@ namespace App\Entity;
 
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Entity]
 class Transaction
 {
-    const SOURCE_AIRBANK = "airbank";
-    const SOURCE_SBERBANK = "sberbank";
-    const SOURCE_EQUABANK = "equabank";
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
+
+    #[Orm\ManyToOne(targetEntity: BankAccount::class)]
+    #[Orm\JoinColumn(name: "bank_account_id", referencedColumnName: "id")]
+    private ?BankAccount $bankAccount = null;
 
     #[ORM\Column(type: 'string', length: 50)]
     private ?string $transactionId = null;
@@ -37,9 +38,6 @@ class Transaction
 
     #[ORM\Column(type: 'string', length: 3)]
     private ?string $currency = null;
-
-    #[ORM\Column(type: 'string', length: 10)]
-    private ?string $source = null;
 
     #[ORM\Column(type: 'string', length: 25, nullable: true)]
     private ?string $variableSymbol = null;
@@ -64,6 +62,14 @@ class Transaction
 
     #[ORM\Column(type: 'date', nullable: true)]
     private ?DateTimeInterface $dateOfCharge = null;
+
+    #[ORM\Column(type: 'datetime')]
+    #[Gedmo\Timestampable(on: "create")]
+    private ?DateTimeInterface $created = null;
+
+    #[ORM\Column(type: 'datetime')]
+    #[Gedmo\Timestampable(on: "update")]
+    private ?DateTimeInterface $updated = null;
 
     public function getId(): ?int
     {
@@ -249,6 +255,39 @@ class Transaction
     public function setConsigneeMessage(?string $consigneeMessage): Transaction
     {
         $this->consigneeMessage = $consigneeMessage;
+        return $this;
+    }
+
+    public function getCreated(): ?DateTimeInterface
+    {
+        return $this->created;
+    }
+
+    public function setCreated(?DateTimeInterface $created): Transaction
+    {
+        $this->created = $created;
+        return $this;
+    }
+
+    public function getUpdated(): ?DateTimeInterface
+    {
+        return $this->updated;
+    }
+
+    public function setUpdated(?DateTimeInterface $updated): Transaction
+    {
+        $this->updated = $updated;
+        return $this;
+    }
+
+    public function getBankAccount(): ?BankAccount
+    {
+        return $this->bankAccount;
+    }
+
+    public function setBankAccount(?BankAccount $bankAccount): Transaction
+    {
+        $this->bankAccount = $bankAccount;
         return $this;
     }
 }
