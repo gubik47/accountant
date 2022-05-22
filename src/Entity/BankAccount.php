@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -34,6 +36,15 @@ class BankAccount
     #[ORM\Column(type: 'datetime')]
     #[Gedmo\Timestampable(on: "update")]
     private ?DateTimeInterface $updated = null;
+
+    #[Orm\OneToMany(mappedBy: "bankAccount", targetEntity: Transaction::class, cascade: ["persist", "remove"], orphanRemoval: true)]
+    #[Orm\OrderBy(["dateOfIssue" => "DESC"])]
+    private Collection $transactions;
+
+    public function __construct()
+    {
+        $this->transactions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -110,5 +121,13 @@ class BankAccount
     {
         $this->updated = $updated;
         return $this;
+    }
+
+    /**
+     * @return Collection|Transaction[]
+     */
+    public function getTransactions(): Collection|array
+    {
+        return $this->transactions;
     }
 }
