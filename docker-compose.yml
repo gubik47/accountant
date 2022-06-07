@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
     app:
+        hostname: accountant.local
         container_name: accountant_app
         build:
             context: ./docker/webserver
@@ -14,7 +15,7 @@ services:
             - ./:/var/www
         networks:
             - default
-            - cnc_network
+            - accountant_network
             - traefik_proxy
         labels:
             - "traefik.enable=true"
@@ -58,7 +59,7 @@ services:
             - "traefik.docker.network=traefik_proxy"
 
 networks:
-    cnc_network:
+    accountant_network:
         external: true
     traefik_proxy:
         external: true

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Api;
 
 use App\Entity\BankAccount;
 use App\Entity\Transaction;
@@ -9,35 +9,18 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-class BankAccountController extends AbstractController
+class TransactionController extends AbstractController
 {
-    #[Route("/api/accounts", name: "api_account_list", methods: ["GET"])]
-    public function list(EntityManagerInterface $em): JsonResponse
+    #[Route("/api/accounts/{id}/transactions", name: "api_transaction_list", methods: ["GET"])]
+    public function list(int $id, EntityManagerInterface $em): JsonResponse
     {
         $repo = $em->getRepository(BankAccount::class);
 
-        $accounts = $repo->findAll();
+        $account = $repo->find($id);
 
         $response = [];
-        foreach ($accounts as $account) {
-            $accountData = [
-                "id" => $account->getId(),
-                "bank" => [
-                    "id" => $account->getBank()->getId(),
-                    "name" => $account->getBank()->getName(),
-                    "code" => $account->getBank()->getCode()
-                ],
-                "name" => $account->getName(),
-                "number" => $account->getNumber(),
-                "owner" => $account->getOwner(),
-                "transactions" => []
-            ];
-
-            foreach ($account->getTransactions() as $transaction) {
-                $accountData["transactions"][] = $this->addTransaction($transaction);
-            }
-
-            $response[] = $accountData;
+        foreach ($account->getTransactions() as $transaction) {
+            $response[] = $this->addTransaction($transaction);
         }
 
         return $this->json($response);
