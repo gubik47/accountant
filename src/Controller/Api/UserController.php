@@ -36,7 +36,7 @@ class UserController extends BaseController
     {
         $user = $this->userRepo->find($id);
         if (!$user) {
-            throw new NotFoundHttpException("User $id was not found");
+            throw new NotFoundHttpException("User ID $id was not found");
         }
 
         return $this->json($user);
@@ -47,13 +47,13 @@ class UserController extends BaseController
     {
         $user = $this->userRepo->find($id);
         if (!$user) {
-            throw new NotFoundHttpException("User $id was not found");
+            throw new NotFoundHttpException("User ID $id was not found");
         }
 
         $this->em->remove($user);
         $this->em->flush();
 
-        return $this->apiResponseFactory->createSuccessResponseMessage("User $id was successfully deleted.");
+        return $this->apiResponseFactory->createSuccessResponseMessage("User ID $id was successfully deleted.");
     }
 
     #[Route("/{id}", name: "update", requirements: ["id" => "\d+"], methods: ["POST"])]
@@ -63,11 +63,10 @@ class UserController extends BaseController
 
         $user = $this->userRepo->find($id);
         if (!$user) {
-            throw new NotFoundHttpException("User $id was not found");
+            throw new NotFoundHttpException("User ID $id was not found");
         }
 
-
-        $user->updateProperties(json_decode($request->getContent(), true));
+        $user->updateProperties($this->em, json_decode($request->getContent(), true));
 
         $this->em->persist($user);
         $this->em->flush();
@@ -82,7 +81,7 @@ class UserController extends BaseController
 
         $user = new User();
 
-        $user->updateProperties(json_decode($request->getContent(), true));
+        $user->updateProperties($this->em, json_decode($request->getContent(), true));
 
         $this->em->persist($user);
         $this->em->flush();

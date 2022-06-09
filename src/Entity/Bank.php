@@ -2,16 +2,18 @@
 
 namespace App\Entity;
 
+use App\Repository\BankRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
-#[ORM\Entity]
-class Bank extends BaseEntity
+#[ORM\Entity(repositoryClass: BankRepository::class)]
+class Bank extends BaseEntity implements JsonSerializable
 {
     #[ORM\Column(type: "string", length: 100)]
-    private ?string $name = null;
+    protected ?string $name = null;
 
     #[ORM\Column(type: "string", length: 5)]
-    private ?string $code = null;
+    protected ?string $code = null;
 
     public function getName(): ?string
     {
@@ -33,5 +35,14 @@ class Bank extends BaseEntity
     {
         $this->code = $code;
         return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            "id" => $this->id,
+            "name" => $this->name,
+            "code" => $this->code
+        ];
     }
 }

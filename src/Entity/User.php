@@ -12,10 +12,10 @@ use JsonSerializable;
 class User extends BaseEntity implements JsonSerializable
 {
     #[ORM\Column(type: "string")]
-    private ?string $firstName = null;
+    protected ?string $firstName = null;
 
     #[ORM\Column(type: "string")]
-    private ?string $lastName = null;
+    protected ?string $lastName = null;
 
     #[Orm\OneToMany(mappedBy: "user", targetEntity: BankAccount::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     #[Orm\OrderBy(["number" => "ASC"])]
@@ -60,16 +60,8 @@ class User extends BaseEntity implements JsonSerializable
     {
         return [
             "id" => $this->id,
-            "first_name" => $this->firstName,
-            "last_name" => $this->lastName
+            "firstName" => $this->firstName,
+            "lastName" => $this->lastName
         ];
-    }
-
-    public function updateProperties(array $data): User
-    {
-        $this->firstName = $data["first_name"];
-        $this->lastName = $data["last_name"];
-
-        return $this;
     }
 }
