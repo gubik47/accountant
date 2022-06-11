@@ -2,38 +2,101 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Bank;
 use App\Entity\BankAccount;
+use App\Entity\User;
+use App\Repository\BankAccountRepository;
+use App\Service\RequestValidator\BankAccountRequestValidator;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
-class BankAccountController extends AbstractController
+#[Route("/accounts", name: "accounts_")]
+class BankAccountController extends BaseController
 {
-    #[Route("/api/accounts", name: "api_account_list", methods: ["GET"])]
-    public function list(EntityManagerInterface $em): JsonResponse
+    private BankAccountRepository $accountRepo;
+    private BankAccountRequestValidator $validator;
+
+    public function __construct(EntityManagerInterface $em, BankAccountRequestValidator $validator)
     {
-        $repo = $em->getRepository(BankAccount::class);
+        parent::__construct($em);
 
-        $accounts = $repo->findAll();
+        $this->accountRepo = $em->getRepository(BankAccount::class);
+        $this->validator = $validator;
+    }
 
-        $response = [];
-        foreach ($accounts as $account) {
-            $accountData = [
-                "id" => $account->getId(),
-                "bank" => [
-                    "id" => $account->getBank()->getId(),
-                    "name" => $account->getBank()->getName(),
-                    "code" => $account->getBank()->getCode()
-                ],
-                "name" => $account->getName(),
-                "number" => $account->getNumber(),
-                "owner" => $account->getOwner()
-            ];
+    #[Route("", name: "list", methods: ["GET"])]
+    public function list(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $accounts = $this->accountRepo->findBy(["user" => $request->query->get("user")]);
 
-            $response[] = $accountData;
+        return $this->json($accounts);
+    }
+
+    #[Route("/{id}", name: "get", requirements: ["id" => "\d+"], methods: ["GET"])]
+    public function get(int $id): JsonResponse
+    {
+        $account = $this->accountRepo->find($id);
+        if (!$account) {
+            throw new NotFoundHttpException("Account ID $id was not found");
         }
 
-        return $this->json($response);
+        return $this->json($account);
+    }
+
+    #[Route("", name: "create", methods: ["PUT"])]
+    public function create(Request $request): JsonResponse
+    {
+        $this->validator->validateRequest($request);
+
+        $account = new BankAccount();
+
+        $data = json_decode($request->getContent(), true);
+
+        $bank = $this->em->find(Bank::class, $data["bank"]);
+        $user = $this->em->find(User::class, $data["user"]);
+
+        $account->updateProperties($this->em, $data)
+            ->setBank($bank)
+            ->setUser($user);
+
+        $this->em->persist($account);
+        $this->em->flush();
+
+        return $this->json($account);
+    }
+
+    #[Route("/{id}", name: "update", requirements: ["id" => "\d+"], methods: ["POST"])]
+    public function update(int $id, Request $request): JsonResponse
+    {
+        $this->validator->validateRequest($request);
+
+        $account = $this->accountRepo->find($id);
+        if (!$account) {
+            throw new NotFoundHttpException("Account ID $id was not found");
+        }
+
+        $account->updateProperties($this->em, json_decode($request->getContent(), true));
+
+        $this->em->persist($account);
+        $this->em->flush();
+
+        return $this->json($account);
+    }
+
+    #[Route("/{id}", name: "delete", requirements: ["id" => "\d+"], methods: ["DELETE"])]
+    public function delete(int $id): JsonResponse
+    {
+        $account = $this->accountRepo->find($id);
+        if (!$account) {
+            throw new NotFoundHttpException("Account ID $id was not found");
+        }
+
+        $this->em->remove($account);
+        $this->em->flush();
+
+        return $this->apiResponseFactory->createSuccessResponseMessage("Account ID $id was successfully deleted.");
     }
 }

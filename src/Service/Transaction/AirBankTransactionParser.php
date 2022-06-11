@@ -1,23 +1,20 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Transaction;
 
 use App\Entity\Transaction;
 use DateTime;
+use League\Csv\Reader;
 
 class AirBankTransactionParser extends TransactionParser
 {
     public function getTransactionId(array $data): string
     {
-        return iconv("Windows-1250", "UTF-8", $data[32]);
+        return $data[32];
     }
 
     public function updateTransactionData(Transaction $transaction, array $data): void
     {
-        $data = array_map(function ($value) {
-            return iconv("Windows-1250", "UTF-8", $value);
-        }, $data);
-
         $transaction
             ->setDateOfIssue($data[0] ? DateTime::createFromFormat("d/m/Y", $data[0]) : null)
             ->setType($data[2])
@@ -32,5 +29,17 @@ class AirBankTransactionParser extends TransactionParser
             ->setConsigneeMessage($data[19] ?: null)
             ->setLocation($data[24] ?: null)
             ->setDateOfCharge($data[29] ? DateTime::createFromFormat("d/m/Y", $data[29]) : null);
+    }
+
+    public function parseCsvLines(string $csvData): iterable
+    {
+        $csvData = iconv("Windows-1250", "UTF-8", $csvData);
+
+        $reader = Reader::createFromString($csvData);
+        $reader->setHeaderOffset(0)
+            ->setDelimiter(";")
+            ->setEnclosure("\"");
+
+        return $reader->getRecords();
     }
 }

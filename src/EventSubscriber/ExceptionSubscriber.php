@@ -28,6 +28,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
         } elseif ($exception instanceof NotFoundHttpException) {
             $event->setResponse($this->apiResponseFactory->createErrorResponseMessage($exception->getMessage(), Response::HTTP_NOT_FOUND));
         } else {
+            dump($exception);die;
             $event->setResponse($this->apiResponseFactory->createErrorResponseMessage("Unexpected API error", Response::HTTP_INTERNAL_SERVER_ERROR));
         }
     }

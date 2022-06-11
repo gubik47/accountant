@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Transaction;
 
 use App\Entity\Transaction;
 use DateTime;
+use League\Csv\Reader;
 
 class EquaBankTransactionParser extends TransactionParser
 {
@@ -27,5 +28,15 @@ class EquaBankTransactionParser extends TransactionParser
             ->setSpecificSymbol($data[13] ?: null)
             ->setConstantSymbol($data[14] ?: null)
             ->setLocation($data[15] ?: null);
+    }
+
+    public function parseCsvLines(string $csvData): iterable
+    {
+        $reader = Reader::createFromString($csvData);
+        $reader->setHeaderOffset(0)
+            ->setDelimiter(";")
+            ->setEnclosure("\"");
+
+        return $reader->getRecords();
     }
 }

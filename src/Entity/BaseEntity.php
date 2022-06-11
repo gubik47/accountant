@@ -65,7 +65,7 @@ abstract class BaseEntity
         return $this;
     }
 
-    public function updateProperties(EntityManagerInterface $em, array $data): void
+    public function updateProperties(EntityManagerInterface $em, array $data): static
     {
         $this->getClassMetadata($em);
 
@@ -101,6 +101,8 @@ abstract class BaseEntity
 
             $this->{$property} = $value;
         }
+
+        return $this;
     }
 
     private function getClassMetadata(EntityManagerInterface $em): void

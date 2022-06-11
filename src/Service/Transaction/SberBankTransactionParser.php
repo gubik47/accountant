@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Transaction;
 
 use App\Entity\Transaction;
 use DateTime;
+use League\Csv\Reader;
 
 class SberBankTransactionParser extends TransactionParser
 {
@@ -23,5 +24,15 @@ class SberBankTransactionParser extends TransactionParser
             ->setCounterPartyAccountNumber($data[4] ?: null)
             ->setAmount(floatval(str_replace(",", ".", $data[5])))
             ->setCurrency($data[6]);
+    }
+
+    public function parseCsvLines(string $csvData): iterable
+    {
+        $reader = Reader::createFromString($csvData);
+        $reader->setHeaderOffset(0)
+            ->setDelimiter(";")
+            ->setEnclosure("\"");
+
+        return $reader->getRecords();
     }
 }

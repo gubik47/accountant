@@ -4,82 +4,71 @@ namespace App\Controller\Api;
 
 use App\Entity\BankAccount;
 use App\Entity\Transaction;
+use App\Repository\TransactionRepository;
+use App\Service\Transaction\TransactionImporter;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
-class TransactionController extends AbstractController
+#[Route("/transactions", name: "transactions_")]
+class TransactionController extends BaseController
 {
-    #[Route("/api/accounts/{id}/transactions", name: "api_transaction_list", methods: ["GET"])]
-    public function list(int $id, EntityManagerInterface $em): JsonResponse
+    private TransactionRepository $repo;
+
+    public function __construct(EntityManagerInterface $em)
     {
-        $repo = $em->getRepository(BankAccount::class);
+        parent::__construct($em);
 
-        $account = $repo->find($id);
-
-        $response = [];
-        foreach ($account->getTransactions() as $transaction) {
-            $response[] = $this->addTransaction($transaction);
-        }
-
-        return $this->json($response);
+        $this->repo = $this->em->getRepository(Transaction::class);
     }
 
-    private function addTransaction(Transaction $transaction): array
+    #[Route("", name: "list", methods: ["GET"])]
+    public function list(Request $request): JsonResponse
     {
-        $json = [
-            "id" => intval($transaction->getId()),
-            "transaction_id" => strval($transaction->getTransactionId()),
-            "type" => strval($transaction->getType()),
-            "amount" => $transaction->getAmount(),
-            "currency" => strval($transaction->getCurrency())
-        ];
+        $accountId = intval($request->query->get("account"));
 
-        if ($transaction->getDateOfIssue()) {
-            $json["date_of_issue"] = $transaction->getDateOfIssue()->format("Y-m-d");
+        $account = $this->em->find(BankAccount::class, $accountId);
+        if (!$account) {
+            throw new NotFoundHttpException("Account ID $accountId not found.");
         }
 
-        if ($transaction->getDateOfCharge()) {
-            $json["date_of_charge"] = $transaction->getDateOfCharge()->format("Y-m-d");
+        // TODO: paging, sort, filter
+        $transactions = $this->repo->findBy([
+            "bankAccount" => $account
+        ]);
+
+        return $this->json($transactions);
+    }
+
+    #[Route("/add", name: "upload_file", methods: ["POST"])]
+    public function upload(Request $request, TransactionImporter $importer): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $accountId = $data["accountId"];
+
+        $account = $this->em->find(BankAccount::class, $accountId);
+        if (!$account) {
+            throw new NotFoundHttpException("Account ID $accountId was not found");
         }
 
-        if ($transaction->getDescription()) {
-            $json["description"] = $transaction->getDescription();
-        }
+        $csvData = base64_decode($data["file"]);
 
-        if ($transaction->getNote()) {
-            $json["note"] = $transaction->getNote();
-        }
+        // TODO: validace CSV
+//        $tmpFilePath = stream_get_meta_data(tmpfile())["uri"];
+//        file_put_contents($tmpFilePath, $csvData);
+//
+//        $file = new File($tmpFilePath);
+//        dump($file->getMimeType());die;
+//        if ($file->getMimeType() !== "csv") {
+//
+//        }
 
-        if ($transaction->getVariableSymbol()) {
-            $json["variable_symbol"] = $transaction->getVariableSymbol();
-        }
+        $count = $importer->importTransactions($account, $csvData);
 
-        if ($transaction->getConstantSymbol()) {
-            $json["constant_symbol"] = $transaction->getConstantSymbol();
-        }
-
-        if ($transaction->getSpecificSymbol()) {
-            $json["specific_symbol"] = $transaction->getSpecificSymbol();
-        }
-
-        if ($transaction->getCounterPartyAccountName()) {
-            $json["counterparty_account_name"] = $transaction->getCounterPartyAccountName();
-        }
-
-        if ($transaction->getCounterPartyAccountNumber()) {
-            $json["counterparty_account_number"] = $transaction->getCounterPartyAccountNumber();
-        }
-
-        if ($transaction->getLocation()) {
-            $json["location"] = $transaction->getLocation();
-        }
-
-        if ($transaction->getConsigneeMessage()) {
-            $json["consignee_message"] = $transaction->getConsigneeMessage();
-        }
-
-        return $json;
+        return $this->apiResponseFactory
+            ->createSuccessResponseMessage("Successfully imported $count transactions for account {$account->getNumber()}");
     }
 }

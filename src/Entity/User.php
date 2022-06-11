@@ -19,6 +19,7 @@ class User extends BaseEntity implements JsonSerializable
 
     #[Orm\OneToMany(mappedBy: "user", targetEntity: BankAccount::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     #[Orm\OrderBy(["number" => "ASC"])]
+    /** @var Collection<BankAccount> */
     private Collection $accounts;
 
     public function __construct()
@@ -49,9 +50,9 @@ class User extends BaseEntity implements JsonSerializable
     }
 
     /**
-     * @return Collection|BankAccount[]
+     * @return Collection<BankAccount>
      */
-    public function getAccounts(): Collection|array
+    public function getAccounts(): Collection
     {
         return $this->accounts;
     }
@@ -61,7 +62,19 @@ class User extends BaseEntity implements JsonSerializable
         return [
             "id" => $this->id,
             "firstName" => $this->firstName,
-            "lastName" => $this->lastName
+            "lastName" => $this->lastName,
+            "totalBalance" => $this->getTotalAccountBalanceSum()
         ];
+    }
+
+    public function getTotalAccountBalanceSum(): float
+    {
+        $total = 0;
+
+        foreach ($this->accounts as $account) {
+            $total += $account->getBalance();
+        }
+
+        return round($total, 2);
     }
 }

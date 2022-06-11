@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
+use App\Repository\TransactionRepository;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
-#[ORM\Entity]
-class Transaction extends BaseEntity
+#[ORM\Entity(repositoryClass: TransactionRepository::class)]
+class Transaction extends BaseEntity implements JsonSerializable
 {
     #[Orm\ManyToOne(targetEntity: BankAccount::class)]
     #[Orm\JoinColumn(name: "bank_account_id", referencedColumnName: "id")]
@@ -242,5 +244,62 @@ class Transaction extends BaseEntity
     {
         $this->bankAccount = $bankAccount;
         return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        $json = [
+            "id" => intval($this->id),
+            "transaction_id" => strval($this->transactionId),
+            "type" => strval($this->type),
+            "amount" => $this->amount,
+            "currency" => strval($this->currency)
+        ];
+
+        if ($this->dateOfIssue) {
+            $json["date_of_issue"] = $this->dateOfIssue->format("Y-m-d");
+        }
+
+        if ($this->dateOfCharge) {
+            $json["date_of_charge"] = $this->dateOfCharge->format("Y-m-d");
+        }
+
+        if ($this->description) {
+            $json["description"] = $this->description;
+        }
+
+        if ($this->note) {
+            $json["note"] = $this->note;
+        }
+
+        if ($this->variableSymbol) {
+            $json["variable_symbol"] = $this->variableSymbol;
+        }
+
+        if ($this->constantSymbol) {
+            $json["constant_symbol"] = $this->constantSymbol;
+        }
+
+        if ($this->specificSymbol) {
+            $json["specific_symbol"] = $this->specificSymbol;
+        }
+
+        if ($this->counterPartyAccountName) {
+            $json["counterparty_account_name"] = $this->counterPartyAccountName;
+        }
+
+        if ($this->counterPartyAccountNumber) {
+            $json["counterparty_account_number"] = $this->counterPartyAccountNumber;
+        }
+
+        if ($this->location) {
+            $json["location"] = $this->location;
+        }
+
+        if ($this->consigneeMessage) {
+            $json["consignee_message"] = $this->consigneeMessage;
+        }
+
+        return $json;
     }
 }
