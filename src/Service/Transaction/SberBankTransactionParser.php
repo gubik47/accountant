@@ -22,7 +22,7 @@ class SberBankTransactionParser extends TransactionParser
             ->setType($data[2])
             ->setDescription($data[3] ?: null)
             ->setCounterPartyAccountNumber($data[4] ?: null)
-            ->setAmount(floatval(str_replace(",", ".", $data[5])))
+            ->setAmount($this->parseFloat($data[5]))
             ->setCurrency($data[6]);
     }
 

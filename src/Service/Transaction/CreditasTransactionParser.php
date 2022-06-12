@@ -41,7 +41,7 @@ class CreditasTransactionParser extends TransactionParser
             ->setConstantSymbol($data[11] ?: null)
             ->setConsigneeMessage($data[13] ?: null)
             ->setNote($data[14] ?: null)
-            ->setAmount(floatval(str_replace(",", ".", $data[16])))
+            ->setAmount($this->parseFloat($data[16]))
             ->setCurrency($data[17]);
 
         if (!$data[5]) {

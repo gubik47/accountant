@@ -11,4 +11,9 @@ abstract class TransactionParser
     abstract public function getTransactionId(array $data): string;
 
     abstract public function updateTransactionData(Transaction $transaction, array $data): void;
+
+    protected function parseFloat(string $data): float
+    {
+        return floatval(str_replace([",", " "], [".", ""], $data));
+    }
 }

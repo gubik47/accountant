@@ -20,7 +20,7 @@ class EquaBankTransactionParser extends TransactionParser
             ->setCounterPartyAccountName($data[3] ?: null)
             ->setDateOfCharge($data[4] ? DateTime::createFromFormat("d.m.Y", $data[4]) : null)
             ->setDateOfIssue($data[5] ? DateTime::createFromFormat("d.m.Y", $data[5]) : null)
-            ->setAmount(floatval(str_replace(",", ".", $data[6])))
+            ->setAmount($this->parseFloat($data[6]))
             ->setCurrency($data[7])
             ->setType($data[8])
             ->setDescription($data[9] ?: null)

@@ -19,7 +19,7 @@ class AirBankTransactionParser extends TransactionParser
             ->setDateOfIssue($data[0] ? DateTime::createFromFormat("d/m/Y", $data[0]) : null)
             ->setType($data[2])
             ->setCurrency($data[4])
-            ->setAmount(floatval(str_replace(",", ".", $data[5])))
+            ->setAmount($this->parseFloat($data[5]))
             ->setCounterPartyAccountName($data[9] ?: null)
             ->setCounterPartyAccountNumber($data[10] ?: null)
             ->setVariableSymbol($data[12] ?: null)
