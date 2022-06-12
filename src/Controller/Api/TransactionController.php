@@ -34,11 +34,12 @@ class TransactionController extends BaseController
             throw new NotFoundHttpException("Account ID $accountId not found.");
         }
 
-        list ($transactions, $totalCount) = $this->repo->getTransactionList($account, $request);
+        list ($transactions, $totalCount, $pagination) = $this->repo->getTransactionList($account, $request);
 
         return $this->json([
             "transactions" => $transactions,
-            "total_count" => $totalCount
+            "total_count" => $totalCount,
+            "pagination" => $pagination
         ]);
     }
 
@@ -55,16 +56,6 @@ class TransactionController extends BaseController
         }
 
         $csvData = base64_decode($data["file"]);
-
-        // TODO: validace CSV
-//        $tmpFilePath = stream_get_meta_data(tmpfile())["uri"];
-//        file_put_contents($tmpFilePath, $csvData);
-//
-//        $file = new File($tmpFilePath);
-//        dump($file->getMimeType());die;
-//        if ($file->getMimeType() !== "csv") {
-//
-//        }
 
         $count = $importer->importTransactions($account, $csvData);
 

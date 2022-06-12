@@ -61,9 +61,9 @@ class User extends BaseEntity implements JsonSerializable
     {
         return [
             "id" => $this->id,
-            "firstName" => $this->firstName,
-            "lastName" => $this->lastName,
-            "totalBalance" => $this->getTotalAccountBalanceSum()
+            "first_name" => $this->firstName,
+            "last_name" => $this->lastName,
+            "total_balance" => $this->getTotalAccountBalanceSum()
         ];
     }
 

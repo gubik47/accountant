@@ -124,7 +124,8 @@ class BankAccount extends BaseEntity implements JsonSerializable
             "name" => $this->name,
             "number" => $this->number,
             "owner" => $this->owner,
-            "balance" => $this->getBalance()
+            "balance" => $this->getBalance(),
+            "user_id" => $this->user?->getId()
         ];
     }
 }

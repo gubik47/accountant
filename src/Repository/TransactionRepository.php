@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Component\Model\Pagination;
 use App\Entity\BankAccount;
 use App\Entity\Transaction;
 use Doctrine\ORM\EntityRepository;
@@ -26,7 +27,7 @@ class TransactionRepository extends EntityRepository
             ->getQuery()
             ->getSingleScalarResult();
 
-        list ($sort, $limit, $offset) = $this->parseTransactionListRequestParams($request);
+        list ($sort, $limit, $offset, $page) = $this->parseTransactionListRequestParams($request);
 
         $transactions = $qb->select("t")
             ->orderBy(...$sort)
@@ -35,7 +36,9 @@ class TransactionRepository extends EntityRepository
             ->getQuery()
             ->getResult();
 
-        return [$transactions, $count];
+        $pagination = new Pagination($limit, $page, $count);
+
+        return [$transactions, $count, $pagination];
     }
 
     private function getTransactionListQueryBuilder(BankAccount $account): QueryBuilder
@@ -64,6 +67,6 @@ class TransactionRepository extends EntityRepository
         // only default sorting for now
         $sort = ["t.dateOfIssue", "DESC"];
 
-        return [$sort, $limit, $offset];
+        return [$sort, $limit, $offset, $page];
     }
 }
