@@ -10,6 +10,8 @@ use Doctrine\ORM\EntityRepository;
  * @method Bank|null findOneBy(array $criteria, array $orderBy = null)
  * @method Bank[]    findAll()
  * @method Bank[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ *
+ * @extends EntityRepository<Bank>
  */
 class BankRepository extends EntityRepository
 {

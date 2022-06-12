@@ -65,6 +65,11 @@ abstract class BaseEntity
         return $this;
     }
 
+    /**
+     * @param EntityManagerInterface $em
+     * @param mixed[]                $data
+     * @return $this
+     */
     public function updateProperties(EntityManagerInterface $em, array $data): static
     {
         $this->getClassMetadata($em);

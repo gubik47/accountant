@@ -8,11 +8,20 @@ use League\Csv\Reader;
 
 class AirBankTransactionParser extends TransactionParser
 {
+    /**
+     * @param string[] $data
+     * @return string
+     */
     public function getTransactionId(array $data): string
     {
         return $data[32];
     }
 
+    /**
+     * @param Transaction $transaction
+     * @param string[]    $data
+     * @return void
+     */
     public function updateTransactionData(Transaction $transaction, array $data): void
     {
         $transaction
@@ -31,6 +40,10 @@ class AirBankTransactionParser extends TransactionParser
             ->setDateOfCharge($data[29] ? DateTime::createFromFormat("d/m/Y", $data[29]) : null);
     }
 
+    /**
+     * @param string $csvData
+     * @return iterable<mixed>
+     */
     public function parseCsvLines(string $csvData): iterable
     {
         $csvData = iconv("Windows-1250", "UTF-8", $csvData);

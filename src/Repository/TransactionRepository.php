@@ -14,11 +14,19 @@ use Symfony\Component\HttpFoundation\Request;
  * @method Transaction|null findOneBy(array $criteria, array $orderBy = null)
  * @method Transaction[]    findAll()
  * @method Transaction[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ *
+ * @extends EntityRepository<Transaction>
  */
 class TransactionRepository extends EntityRepository
 {
     const DEFAULT_ITEMS_PER_PAGE = 20;
 
+    /**
+     * @param BankAccount $account
+     * @param Request     $request
+     *
+     * @return mixed[]
+     */
     public function getTransactionList(BankAccount $account, Request $request): array
     {
         $qb = $this->getTransactionListQueryBuilder($account);
@@ -48,6 +56,10 @@ class TransactionRepository extends EntityRepository
             ->setParameters(["account" => $account]);
     }
 
+    /**
+     * @param Request $request
+     * @return mixed[]
+     */
     private function parseTransactionListRequestParams(Request $request): array
     {
         $limit = $request->query->get("limit");

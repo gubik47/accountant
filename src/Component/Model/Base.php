@@ -6,8 +6,14 @@ use JsonSerializable;
 
 abstract class Base implements JsonSerializable
 {
+    /**
+     * @var mixed[]
+     */
     protected array $data = [];
 
+    /**
+     * @return mixed[]
+     */
     public function jsonSerialize(): array
     {
         $serialized = [];

@@ -8,11 +8,20 @@ use League\Csv\Reader;
 
 class EquaBankTransactionParser extends TransactionParser
 {
+    /**
+     * @param string[] $data
+     * @return string
+     */
     public function getTransactionId(array $data): string
     {
         return $data[11];
     }
 
+    /**
+     * @param Transaction $transaction
+     * @param string[]    $data
+     * @return void
+     */
     public function updateTransactionData(Transaction $transaction, array $data): void
     {
         $transaction
@@ -30,6 +39,10 @@ class EquaBankTransactionParser extends TransactionParser
             ->setLocation($data[15] ?: null);
     }
 
+    /**
+     * @param string $csvData
+     * @return iterable<mixed>
+     */
     public function parseCsvLines(string $csvData): iterable
     {
         $reader = Reader::createFromString($csvData);

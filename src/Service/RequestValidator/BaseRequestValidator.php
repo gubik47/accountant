@@ -8,6 +8,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class BaseRequestValidator
 {
+    /**
+     * @var mixed[]|null
+     */
     protected ?array $data;
 
     public function validateRequest(Request $request): void

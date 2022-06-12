@@ -8,6 +8,10 @@ use League\Csv\Reader;
 
 class SberBankTransactionParser extends TransactionParser
 {
+    /**
+     * @param string[] $data
+     * @return string
+     */
     public function getTransactionId(array $data): string
     {
         // Sberbank has no transaction ID in its CSV dump
@@ -15,6 +19,11 @@ class SberBankTransactionParser extends TransactionParser
         return substr(sha1(implode(",", $data)), 0, 10);
     }
 
+    /**
+     * @param Transaction $transaction
+     * @param string[]    $data
+     * @return void
+     */
     public function updateTransactionData(Transaction $transaction, array $data): void
     {
         $transaction
@@ -26,6 +35,10 @@ class SberBankTransactionParser extends TransactionParser
             ->setCurrency($data[6]);
     }
 
+    /**
+     * @param string $csvData
+     * @return iterable<mixed>
+     */
     public function parseCsvLines(string $csvData): iterable
     {
         $reader = Reader::createFromString($csvData);

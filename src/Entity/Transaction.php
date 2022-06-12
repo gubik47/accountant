@@ -125,17 +125,6 @@ class Transaction extends BaseEntity implements JsonSerializable
         return $this;
     }
 
-    public function getSource(): ?string
-    {
-        return $this->source;
-    }
-
-    public function setSource(?string $source): Transaction
-    {
-        $this->source = $source;
-        return $this;
-    }
-
     public function getDateOfIssue(): ?DateTimeInterface
     {
         return $this->dateOfIssue;
@@ -246,6 +235,9 @@ class Transaction extends BaseEntity implements JsonSerializable
         return $this;
     }
 
+    /**
+     * @return mixed[]
+     */
     public function jsonSerialize(): array
     {
         $json = [

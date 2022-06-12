@@ -28,9 +28,9 @@ class BankAccount extends BaseEntity implements JsonSerializable
     #[ORM\Column(type: "string", length: 50)]
     protected ?string $number = null;
 
+    /** @var Collection<int, Transaction> */
     #[Orm\OneToMany(mappedBy: "bankAccount", targetEntity: Transaction::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     #[Orm\OrderBy(["dateOfIssue" => "DESC"])]
-    /** @var Collection<Transaction> */
     private Collection $transactions;
 
     public function __construct()
@@ -94,7 +94,7 @@ class BankAccount extends BaseEntity implements JsonSerializable
     }
 
     /**
-     * @return Collection<Transaction>
+     * @return Collection<int, Transaction>
      */
     public function getTransactions(): Collection
     {
@@ -112,6 +112,9 @@ class BankAccount extends BaseEntity implements JsonSerializable
         return round($total, 2);
     }
 
+    /**
+     * @return mixed[]
+     */
     public function jsonSerialize(): array
     {
         return [

@@ -37,6 +37,9 @@ class Bank extends BaseEntity implements JsonSerializable
         return $this;
     }
 
+    /**
+     * @return mixed[]
+     */
     public function jsonSerialize(): array
     {
         return [

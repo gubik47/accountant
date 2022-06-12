@@ -9,6 +9,10 @@ use League\Csv\Statement;
 
 class CreditasTransactionParser extends TransactionParser
 {
+    /**
+     * @param string $csvData
+     * @return iterable<mixed>
+     */
     public function parseCsvLines(string $csvData): iterable
     {
         $csvData = iconv("Windows-1250", "UTF-8", $csvData);
@@ -23,6 +27,10 @@ class CreditasTransactionParser extends TransactionParser
         return $stmt->process($reader);
     }
 
+    /**
+     * @param string[] $data
+     * @return string
+     */
     public function getTransactionId(array $data): string
     {
         // Creditas has no transaction ID in its CSV dump
@@ -30,6 +38,11 @@ class CreditasTransactionParser extends TransactionParser
         return substr(sha1(implode(",", [$data[3], $data[16], $data[17]])), 0, 10);
     }
 
+    /**
+     * @param Transaction $transaction
+     * @param string[]       $data
+     * @return void
+     */
     public function updateTransactionData(Transaction $transaction, array $data): void
     {
         $transaction

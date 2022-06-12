@@ -17,9 +17,9 @@ class User extends BaseEntity implements JsonSerializable
     #[ORM\Column(type: "string")]
     protected ?string $lastName = null;
 
+    /** @var Collection<int, BankAccount> */
     #[Orm\OneToMany(mappedBy: "user", targetEntity: BankAccount::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     #[Orm\OrderBy(["number" => "ASC"])]
-    /** @var Collection<BankAccount> */
     private Collection $accounts;
 
     public function __construct()
@@ -50,13 +50,16 @@ class User extends BaseEntity implements JsonSerializable
     }
 
     /**
-     * @return Collection<BankAccount>
+     * @return Collection<int, BankAccount>
      */
     public function getAccounts(): Collection
     {
         return $this->accounts;
     }
 
+    /**
+     * @return mixed[]
+     */
     public function jsonSerialize(): array
     {
         return [
