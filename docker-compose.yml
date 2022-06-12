@@ -2,8 +2,8 @@ version: '3.8'
 
 services:
     app:
-        hostname: accountant.local
-        container_name: accountant_app
+        hostname: api.accountant.local
+        container_name: accountant_api
         build:
             context: ./docker/webserver
         environment:
@@ -19,11 +19,11 @@ services:
             - traefik_proxy
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.cnc_admin.rule=Host(`accountant.local`)"
+            - "traefik.http.routers.accountant_api.rule=Host(`api.accountant.local`)"
             - "traefik.docker.network=traefik_proxy"
 
     builder:
-        container_name: accountant_builder
+        container_name: accountant_api_builder
         build:
             context: ./docker/builder
         environment:
@@ -55,7 +55,7 @@ services:
             - traefik_proxy
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.cnc_admin_mysql.rule=Host(`mysql.accountant.local`)"
+            - "traefik.http.routers.accountant_api_mysql.rule=Host(`mysql.accountant.local`)"
             - "traefik.docker.network=traefik_proxy"
 
 networks:
