@@ -21,7 +21,7 @@ class ApiResponseFactory
     {
         return new ApiResponse([
             "status" => $status,
-            "messages" => $message
+            "message" => $message
         ], $httpStatusCode);
     }
 }
