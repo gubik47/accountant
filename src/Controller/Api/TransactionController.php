@@ -34,12 +34,12 @@ class TransactionController extends BaseController
             throw new NotFoundHttpException("Account ID $accountId not found.");
         }
 
-        // TODO: paging, sort, filter
-        $transactions = $this->repo->findBy([
-            "bankAccount" => $account
-        ]);
+        list ($transactions, $totalCount) = $this->repo->getTransactionList($account, $request);
 
-        return $this->json($transactions);
+        return $this->json([
+            "transactions" => $transactions,
+            "total_count" => $totalCount
+        ]);
     }
 
     #[Route("/add", name: "upload_file", methods: ["POST"])]
