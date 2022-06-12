@@ -21,3 +21,12 @@ The API is now ready to be accessed at http://api.accountant.local/. PHPMyAdmin 
 
 ## API documentation
 // TODO:
+
+## Supported banks
+
+Currently, only CSV transaction dumps of these banks are supported:
+
+* AirBank (CZ)
+* EquaBank (CZ)
+* Sberbank (CZ)
+* Creditas (CZ)
