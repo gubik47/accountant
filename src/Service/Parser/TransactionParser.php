@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Transaction;
+namespace App\Service\Parser;
 
 use App\Entity\Transaction;
 

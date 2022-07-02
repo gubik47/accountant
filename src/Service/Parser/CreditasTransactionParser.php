@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Transaction;
+namespace App\Service\Parser;
 
 use App\Entity\Transaction;
 use DateTime;
@@ -57,9 +57,7 @@ class CreditasTransactionParser extends TransactionParser
             ->setAmount($this->parseFloat($data[16]))
             ->setCurrency($data[17]);
 
-        if (!$data[5]) {
-            $transaction->setCounterPartyAccountNumber($transaction->getBankAccount()->getNumber());
-        } else {
+        if (!empty($data[5]) && !empty($data[6])) {
             $transaction->setCounterPartyAccountNumber($data[5] . "/" . $data[6]);
         }
     }
