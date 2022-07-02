@@ -5,7 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\BankAccount;
 use App\Entity\Transaction;
 use App\Repository\TransactionRepository;
-use App\Service\Transaction\TransactionImporter;
+use App\Service\Parser\TransactionImporter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

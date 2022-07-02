@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Service\Transaction;
+namespace App\Service\Parser;
 
 use App\Entity\Transaction;
 use DateTime;
 use League\Csv\Reader;
 
-class AirBankTransactionParser extends TransactionParser
+class SberBankTransactionParser extends TransactionParser
 {
     /**
      * @param string[] $data
@@ -14,7 +14,9 @@ class AirBankTransactionParser extends TransactionParser
      */
     public function getTransactionId(array $data): string
     {
-        return $data[32];
+        // Sberbank has no transaction ID in its CSV dump
+        // generating an artificial one
+        return substr(sha1(implode(",", $data)), 0, 10);
     }
 
     /**
@@ -25,19 +27,12 @@ class AirBankTransactionParser extends TransactionParser
     public function updateTransactionData(Transaction $transaction, array $data): void
     {
         $transaction
-            ->setDateOfIssue($data[0] ? DateTime::createFromFormat("d/m/Y", $data[0]) : null)
+            ->setDateOfIssue(DateTime::createFromFormat("d.m.Y", $data[1]))
             ->setType($data[2])
-            ->setCurrency($data[4])
+            ->setDescription($data[3] ?: null)
+            ->setCounterPartyAccountNumber($data[4] ?: null)
             ->setAmount($this->parseFloat($data[5]))
-            ->setCounterPartyAccountName($data[9] ?: null)
-            ->setCounterPartyAccountNumber($data[10] ?: null)
-            ->setVariableSymbol($data[12] ?: null)
-            ->setConstantSymbol($data[13] ?: null)
-            ->setSpecificSymbol($data[14] ?: null)
-            ->setNote($data[17] ?: null)
-            ->setConsigneeMessage($data[19] ?: null)
-            ->setLocation($data[24] ?: null)
-            ->setDateOfCharge($data[29] ? DateTime::createFromFormat("d/m/Y", $data[29]) : null);
+            ->setCurrency($data[6]);
     }
 
     /**
@@ -46,8 +41,6 @@ class AirBankTransactionParser extends TransactionParser
      */
     public function parseCsvLines(string $csvData): iterable
     {
-        $csvData = iconv("Windows-1250", "UTF-8", $csvData);
-
         $reader = Reader::createFromString($csvData);
         $reader->setHeaderOffset(0)
             ->setDelimiter(";")
