@@ -4,6 +4,8 @@ services:
     app:
         hostname: api.accountant.local
         container_name: accountant_api
+        extra_hosts:
+            -   "host.docker.internal:host-gateway"
         build:
             context: ./docker/webserver
         environment:
