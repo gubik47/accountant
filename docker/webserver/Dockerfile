@@ -9,9 +9,11 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN docker-php-ext-install -j$(nproc) intl curl fileinfo pdo pdo_mysql opcache
 
 RUN pecl install redis-5.3.4 && docker-php-ext-enable redis
+RUN pecl install xdebug
 
 RUN mkdir -m 777 /var/run/php-fpm
 
+COPY xdebug.ini "${PHP_INI_DIR}/conf.d"
 COPY ./php.ini /usr/local/etc/php/php.ini
 COPY ./www.conf /usr/local/etc/php-fpm.d/www.conf
 COPY ./zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
